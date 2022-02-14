@@ -1,31 +1,30 @@
 
-class SearchProblem:
+class Problem:
     """
     This class outlines the structure of a search problem, but doesn't implement
     any of the methods (in this_ojb-oriented terminology: an abstract class).
 
     You do not need to change anything in this class, EVER.
     """
-    #TODO
-    def __init__(self, config):
-        pass
+    def __init__(self, state):
+        self.state = state
 
 
-    # TODO
     def get_start_state(self):
         """
         Returns the start state for the search problem.
         """
-        util.raise_not_defined()
+        return self.state
 
-    # TODO
     def is_goal_state(self, state):
         """
           state: Search state
 
         Returns True if and only if the state is a valid goal state.
         """
-        util.raise_not_defined()
+        goal = [0, 3, 4, 3, 0, 5, 6, 5, 0, 1, 2, 1, 0, 7, 8, 7, 0, 9, 10, 9, 0, 1, 2, 1]
+        return state == goal
+
 
     # TODO
     def get_successors(self, state):
@@ -37,7 +36,12 @@ class SearchProblem:
         state, 'action' is the action required to get there, and 'stepCost' is
         the incremental cost of expanding to that successor.
         """
-        util.raise_not_defined()
+        state_1 = [1]
+        state_2 = [1]
+        state_3 = [1]
+        state_4 = [1]
+
+        return [(state_1, 1, 1), (state_2, 2, 1), (state_3, 3, 1), (state_4, 4, 1)]
 
     def get_cost_of_actions(self, actions):
         """
@@ -71,6 +75,12 @@ class Queue:
         return len(self.list) == 0
 
 
+def flatten(state):
+    string = [str(x) for x in state]
+    full_string = ""
+    for s in string:
+         full_string += s
+    return int(full_string)
 
 def breadth_first_search(problem):
     """Search the shallowest nodes in the search tree first."""
@@ -86,11 +96,27 @@ def breadth_first_search(problem):
         if problem.is_goal_state(state):
             return path
 
-        if not state in reached:
-            reached.add(state)
+        if not flatten(state) in reached:
+            reached.add(flatten(state))
             for successor_state, action, cost in problem.get_successors(state):
                 new_path = path[:]
                 new_path.append(action)
                 frontier.push((successor_state, new_path, cost))
 
     print("FAILURE: Goal state not found")
+
+
+
+if __name__ == "__main__":
+#    num_cases = int(input("Input number of cases.\n"))
+#    for i in range(num_cases):
+#        start_config = input("Input starting configuration.\n")
+#        start_config = [int(x) for x in start_config.split(" ")]
+#
+    start_config = input("Input starting configuration.\n")
+    start_config = [int(x) for x in start_config.split(" ")]
+    print(start_config)
+    problem = Problem(start_config)
+    breadth_first_search(problem)
+    
+
