@@ -1,4 +1,3 @@
-
 class Problem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -10,7 +9,7 @@ class Problem:
         self.state = state
 
 
-    def get_start_state(self):
+    def get_state(self):
         """
         Returns the start state for the search problem.
         """
@@ -36,10 +35,18 @@ class Problem:
         state, 'action' is the action required to get there, and 'stepCost' is
         the incremental cost of expanding to that successor.
         """
-        state_1 = [1]
-        state_2 = [1]
-        state_3 = [1]
-        state_4 = [1]
+        # left CW
+        state_1 = state[10:12] + state[0:10] + state[12:21] + state[7:10]
+        # print(state_1)
+        # right CW
+        state_2 = state[0:9] + state[11:23] + state[11:14]
+        # print(state_2)
+        # left CCW
+        state_3 = state[2:12] + state [0:2] + state[12:21] + state[11:12] + state[0:2]
+        # print(state_3)
+        # right CCW
+        state_4 = state[0:9] + state[19:21] + state[9:22]
+        # print(state_4)
 
         return [(state_1, 1, 1), (state_2, 2, 1), (state_3, 3, 1), (state_4, 4, 1)]
 
@@ -50,7 +57,7 @@ class Problem:
         This method returns the total cost of a particular sequence of actions.
         The sequence must be composed of legal moves.
         """
-        util.raise_not_defined()
+        return len(actions)
 
 
 class Queue:
@@ -89,10 +96,10 @@ def breadth_first_search(problem):
     reached = set({})
     
     frontier = Queue()
-    frontier.push((problem.get_start_state(), [], 1))
+    frontier.push((problem.get_state(), [], 1))
 
     while not frontier.is_empty():
-        state, path, _ = frontier.pop()
+        state, path, curr_cost = frontier.pop()
         if problem.is_goal_state(state):
             return path
 
@@ -101,7 +108,7 @@ def breadth_first_search(problem):
             for successor_state, action, cost in problem.get_successors(state):
                 new_path = path[:]
                 new_path.append(action)
-                frontier.push((successor_state, new_path, cost))
+                frontier.push((successor_state, new_path, curr_cost + cost))
 
     print("FAILURE: Goal state not found")
 
@@ -115,8 +122,14 @@ if __name__ == "__main__":
 #
     start_config = input("Input starting configuration.\n")
     start_config = [int(x) for x in start_config.split(" ")]
-    print(start_config)
+    # print(start_config)
     problem = Problem(start_config)
-    breadth_first_search(problem)
+    solution = breadth_first_search(problem)
+    if solution is None:
+        print("Cannot solve with given arrangement")
+    else:
+        print("Solution path:")
+        print(solution)
+        print("Length of solution path =", problem.get_cost_of_actions(solution))
     
 
