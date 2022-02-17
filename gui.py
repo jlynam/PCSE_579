@@ -4,6 +4,7 @@ from solution import *
 import math
 
 COLOR_DICT = {0:"gray", 1:"yellow", 2:"yellow", 3:"blue", 4:"blue", 5:"purple", 6:"purple", 7:"green", 8:"green", 9:"red", 10:"red"}
+state = INITIAL_STATE
 
 class Piece():
 
@@ -31,18 +32,30 @@ class Piece():
             canvas.create_polygon(self.x0, self.y0, x1, y1, x2, y2, fill=self.color, outline="black")
             canvas.create_text(self.x0 + self.text_offset, self.y0 + self.text_offset - 2, text=str(self.number), fill="black", font=("Helvetica 10 bold"))
 
-# TODO
-def left_cw():
-    pass
-# TODO
-def right_cw():
-    pass
-# TODO
-def left_ccw():
-    pass
-# TODO
-def right_ccw():
-    pass
+def left_cw(canvas):
+    global state
+    canvas.delete("all")
+    state = state[10:12] + state[0:10] + state[12:21] + state[7:10]
+    draw_state(canvas, state)
+
+def right_cw(canvas):
+    global state
+    canvas.delete("all")
+    state = state[0:9] + state[11:23] + state[11:14]
+    draw_state(canvas, state)
+
+def left_ccw(canvas):
+    global state
+    canvas.delete("all")
+    state = state[2:12] + state [0:2] + state[12:21] + state[11:12] + state[0:2]
+    draw_state(canvas, state)
+    
+def right_ccw(canvas):
+    global state
+    canvas.delete("all")
+    state = state[0:9] + state[19:21] + state[9:22]
+    draw_state(canvas, state)
+    
 # TODO
 def solve():
     pass
@@ -78,17 +91,17 @@ def draw_state(canvas, state):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title('Two Wheel Puzzle Gui')
+    root.title('Two Wheel Puzzle')
     geometry = '900x700+50+50'
     root.geometry(geometry)
 
     button_frame = ttk.Frame(root)
     button_frame.pack(side=tk.RIGHT)
 
-    button1 = ttk.Button(button_frame, text='1', command=left_cw)
-    button2 = ttk.Button(button_frame, text='2', command=right_cw)
-    button3 = ttk.Button(button_frame, text='3', command=left_ccw)
-    button4 = ttk.Button(button_frame, text='4', command=right_ccw)
+    button1 = ttk.Button(button_frame, text='1', command=lambda: left_cw(canvas))
+    button2 = ttk.Button(button_frame, text='2', command=lambda: right_cw(canvas))
+    button3 = ttk.Button(button_frame, text='3', command=lambda: left_ccw(canvas))
+    button4 = ttk.Button(button_frame, text='4', command=lambda: right_ccw(canvas))
     buttonsolve = ttk.Button(button_frame, text='Solve', command=solve)
     
     PAD = 8
@@ -99,7 +112,8 @@ if __name__ == "__main__":
     buttonsolve.pack(side=tk.TOP, ipadx=PAD, ipady=PAD)
 
     canvas = tk.Canvas(root, width=700, height=500)
-    draw_state(canvas, INITIAL_STATE)
+
+    draw_state(canvas, state)
     canvas.pack()
     
     root.mainloop()
