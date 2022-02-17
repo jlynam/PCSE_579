@@ -72,7 +72,7 @@ def solve(canvas):
             # right_cw(canvas)
         elif move == 3:
             canvas.after(2000, lambda: left_ccw(canvas))
-            left_ccw(canvas)
+            # left_ccw(canvas)
         else:
             canvas.after(2000, lambda: right_ccw(canvas))
             # right_ccw(canvas)
