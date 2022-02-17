@@ -15,8 +15,6 @@ class Piece():
             self.shape = 'r'
         else:
             self.shape = 't'
-        # TODO
-        self.shape = 'r'
         self.color = COLOR_DICT[self.number] 
         self.size = 35
         self.text_offset = 18
@@ -27,20 +25,25 @@ class Piece():
             x1, y1 = self.x0 + self.size, self.y0 + self.size
             canvas.create_rectangle(self.x0, self.y0, x1, y1, fill=self.color, outline="black")
             canvas.create_text(self.x0 + self.text_offset, self.y0 + self.text_offset, text=str(self.number), fill="black", font=("Helvetica 10 bold"))
+        elif self.shape == 't':
+            x1, y1 = self.x0 + self.size / 2, self.y0 + self.size
+            x2, y2 = self.x0 + self.size, self.y0 
+            canvas.create_polygon(self.x0, self.y0, x1, y1, x2, y2, fill=self.color, outline="black")
+            canvas.create_text(self.x0 + self.text_offset, self.y0 + self.text_offset - 2, text=str(self.number), fill="black", font=("Helvetica 10 bold"))
 
-
+# TODO
 def left_cw():
     pass
-
+# TODO
 def right_cw():
     pass
-
+# TODO
 def left_ccw():
     pass
-
+# TODO
 def right_ccw():
     pass
-
+# TODO
 def solve():
     pass
 
