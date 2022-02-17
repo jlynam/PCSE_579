@@ -57,28 +57,36 @@ def right_ccw(canvas):
     state = state[0:9] + state[19:21] + state[9:22]
     draw_state(canvas, state)
     
-# TODO
+# TODO implement A*
 def solve(canvas):
     global state
-    solution = breadth_first_search(state)
+    breadth_first_search(state)
+    solution = a_star_search(state)
     print(solution)
     for move in solution:
        #  print(move)
         if move == 1:
-            canvas.after(2000, lambda: left_cw(canvas))
-            # left_cw(canvas)
+            # canvas.after(2000, lambda: left_cw(canvas))
+            left_cw(canvas)
+            canvas.update_idletasks()
+            time.sleep(1)
         elif move == 2:
-            canvas.after(2000, lambda: right_cw(canvas))
-            # right_cw(canvas)
+            # canvas.after(2000, lambda: right_cw(canvas))
+            right_cw(canvas)
+            canvas.update_idletasks()
+            time.sleep(1)
         elif move == 3:
-            canvas.after(2000, lambda: left_ccw(canvas))
-            # left_ccw(canvas)
+            # canvas.after(2000, lambda: left_ccw(canvas))
+            left_ccw(canvas)
+            canvas.update_idletasks()
+            time.sleep(1)
         else:
-            canvas.after(2000, lambda: right_ccw(canvas))
-            # right_ccw(canvas)
-        
+            # canvas.after(2000, lambda: right_ccw(canvas))
+            right_ccw(canvas)
+            canvas.update_idletasks()
+            time.sleep(1)
+
     print("-----")
-        # time.sleep(2)
             
 
 def deg_to_rad(deg):
@@ -110,6 +118,7 @@ def draw_state(canvas, state):
     for piece in pieces:
         piece.draw(canvas)
 
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.title('Two Wheel Puzzle')
@@ -134,7 +143,7 @@ if __name__ == "__main__":
 
     canvas = tk.Canvas(root, width=700, height=500)
 
-    draw_state(canvas, state)
     canvas.pack()
+    draw_state(canvas, state)
     
     root.mainloop()

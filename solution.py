@@ -1,3 +1,4 @@
+import heapq
 INITIAL_STATE = [0, 3, 4, 3, 0, 5, 6, 5, 0, 1, 2, 1, 0, 7, 8, 7, 0, 9, 10, 9, 0, 1, 2, 1]
 
 def is_goal_state(state):
@@ -64,6 +65,45 @@ class Queue:
         """Returns true if the queue is empty"""
         return len(self.list) == 0
 
+class PriorityQueue:
+    """
+        Implements a priority queue data structure. Each inserted item
+        has a priority associated with it and the client is usually interested
+        in quick retrieval of the lowest-priority item in the queue. This
+        data structure allows O(1) access to the lowest-priority item.
+    """
+
+    def __init__(self):
+        self.heap = []
+        self.count = 0
+
+    def push(self, item, priority):
+        entry = (priority, self.count, item)
+        heapq.heappush(self.heap, entry)
+        self.count += 1
+
+    def pop(self):
+        (_, _, item) = heapq.heappop(self.heap)
+        return item
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+    def update(self, item, priority):
+        # If item already in priority queue with higher priority, update its priority and rebuild
+        # the heap. If item already in priority queue with equal or lower priority, do nothing.
+        # If item not in priority queue, do the same thing as self.push.
+        for index, (p, c, i) in enumerate(self.heap):
+            if i == item:
+                if p <= priority:
+                    break
+                del self.heap[index]
+                self.heap.append((priority, c, item))
+                heapq.heapify(self.heap)
+                break
+        else:
+            self.push(item, priority)
+
 
 def flatten(state):
     string = [str(x) for x in state]
@@ -73,14 +113,17 @@ def flatten(state):
     return int(full_string)
 
 def breadth_first_search(init_state):
+    num_nodes = 0
     reached = set({})
     
     frontier = Queue()
     frontier.push((init_state, [], 1))
 
     while not frontier.is_empty():
+        num_nodes += 1
         state, path, _ = frontier.pop()
         if is_goal_state(state):
+            print(f"BFS expanded {num_nodes=}")
             return path
 
         if get_cost_of_actions(path) < 16 and not flatten(state) in reached:
@@ -92,6 +135,35 @@ def breadth_first_search(init_state):
 
     print("FAILURE: Goal state not found")
 
+
+def heuristic(state):
+    out_of_place = sum([1 for p, gt in zip(state, INITIAL_STATE) if p != gt])
+    return out_of_place
+
+def a_star_search(initial_state, heuristic=heuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+
+    num_nodes = 0
+    reached = set()
+
+    frontier = PriorityQueue()
+    h_cost = heuristic(initial_state)
+    frontier.push((initial_state, [], h_cost), h_cost)
+
+    while not frontier.is_empty():
+        num_nodes += 1
+        state, path, path_cost = frontier.pop()
+        if is_goal_state(state):
+            print(f"A* expanded {num_nodes=}")
+            return path
+
+        if not flatten(state) in reached:
+            reached.add(flatten(state))
+            for successor_state, action, cost in get_successors(state):
+                new_path = path[:]
+                new_path.append(action)
+                h_cost = heuristic(successor_state)
+                frontier.update((successor_state, new_path, path_cost + cost), path_cost + cost + h_cost)
 
 
 if __name__ == "__main__":
