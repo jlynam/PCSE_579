@@ -165,6 +165,10 @@ def a_star_search(initial_state, heuristic=heuristic):
                 h_cost = heuristic(successor_state)
                 frontier.update((successor_state, new_path, path_cost + cost), path_cost + cost + h_cost)
 
+def bidirectional_a_star_search(initial_state, left_heuristic, right_heuristic):
+
+    print("Unimplemented")
+
 
 if __name__ == "__main__":
     start_config = input("Input starting configuration.\n")

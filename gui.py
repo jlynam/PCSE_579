@@ -60,9 +60,9 @@ def right_ccw(canvas):
 # TODO implement A*
 def solve(canvas):
     global state
-    breadth_first_search(state)
+    # print("BFS solution:", breadth_first_search(state))
     solution = a_star_search(state)
-    print(solution)
+    print("A* solution:", solution)
     for move in solution:
        #  print(move)
         if move == 1:
