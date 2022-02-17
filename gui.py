@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from solution import *
 import math
+import time
 
 COLOR_DICT = {0:"gray", 1:"yellow", 2:"yellow", 3:"blue", 4:"blue", 5:"purple", 6:"purple", 7:"green", 8:"green", 9:"red", 10:"red"}
 state = INITIAL_STATE
@@ -57,8 +58,21 @@ def right_ccw(canvas):
     draw_state(canvas, state)
     
 # TODO
-def solve():
-    pass
+def solve(canvas):
+    global state
+    solution = breadth_first_search(state)
+    for move in solution:
+        print(move)
+        if move == 1:
+            left_cw(canvas)
+        elif move == 2:
+            right_cw(canvas)
+        elif move == 3:
+            left_ccw(canvas)
+        else:
+            right_ccw(canvas)
+        time.sleep(2)
+            
 
 def deg_to_rad(deg):
     return deg * math.pi / 180
@@ -102,7 +116,7 @@ if __name__ == "__main__":
     button2 = ttk.Button(button_frame, text='2', command=lambda: right_cw(canvas))
     button3 = ttk.Button(button_frame, text='3', command=lambda: left_ccw(canvas))
     button4 = ttk.Button(button_frame, text='4', command=lambda: right_ccw(canvas))
-    buttonsolve = ttk.Button(button_frame, text='Solve', command=solve)
+    buttonsolve = ttk.Button(button_frame, text='Solve', command=lambda: solve(canvas))
     
     PAD = 8
     button1.pack(side=tk.TOP, ipadx=PAD, ipady=PAD)
