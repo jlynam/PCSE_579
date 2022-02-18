@@ -136,11 +136,16 @@ def breadth_first_search(init_state):
     print("FAILURE: Goal state not found")
 
 
-def heuristic(state):
+def out_of_place_left(state):
     out_of_place = sum([1 for p, gt in zip(state, INITIAL_STATE) if p != gt])
     return out_of_place
 
-def a_star_search(initial_state, heuristic=heuristic):
+
+def out_of_place_right(state, target_state):
+    out_of_place = sum([1 for p, gt in zip(state, target_state) if p != gt])
+    return out_of_place
+
+def a_star_search(initial_state, heuristic=out_of_place_left):
     """Search the node that has the lowest combined cost and heuristic first."""
 
     num_nodes = 0
@@ -165,7 +170,34 @@ def a_star_search(initial_state, heuristic=heuristic):
                 h_cost = heuristic(successor_state)
                 frontier.update((successor_state, new_path, path_cost + cost), path_cost + cost + h_cost)
 
-def bidirectional_a_star_search(initial_state, left_heuristic, right_heuristic):
+def bidirectional_a_star_search(initial_state, left_heuristic=out_of_place_left, right_heuristic=out_of_place_right):
+
+    num_nodes = 0
+
+    reached_left = set()
+    frontier_left = PriorityQueue()
+    h_cost_left = left_heuristic(initial_state)
+    frontier_left.push((initial_state, [], h_cost_left), h_cost_left)
+
+    target_state_right = initial_state
+    reached_right = set()
+    frontier_right = PriorityQueue()
+    h_cost_right = right_heuristic(INITIAL_STATE, target_state_right)
+    frontier_right.push((initial_state, [], h_cost_right), h_cost_right)
+
+
+#    while not frontier_left.is_empty() and not frontier_right.is_empty():
+#        
+#        # Left
+#        num_nodes += 1
+#        state, path, path_cost = frontier_left.pop()
+#        if flatten(state) in reached_right:
+#            print(f"BD A* expanded{num_nodes=}")
+#            return path
+
+        # Right
+#         num_nodes += 1
+
 
     print("Unimplemented")
 
