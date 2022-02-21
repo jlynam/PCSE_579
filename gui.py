@@ -60,9 +60,11 @@ def right_ccw(canvas):
 # TODO implement A*
 def solve(canvas):
     global state
-    # print("BFS solution:", breadth_first_search(state))
-    solution = a_star_search(state)
-    print("A* solution:", solution)
+    solution = breadth_first_search(state)
+    # print(a_star_search(state))
+    # solution = bidirectional_a_star_search(state)
+    # solution = bidirectional_bfs(state)
+    # print("Bi-BFS solution:", solution)
     for move in solution:
        #  print(move)
         if move == 1:
@@ -122,7 +124,7 @@ def draw_state(canvas, state):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title('Two Wheel Puzzle')
-    geometry = '900x700+50+50'
+    geometry = '700x500+50+50'
     root.geometry(geometry)
 
     button_frame = ttk.Frame(root)

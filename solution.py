@@ -1,12 +1,17 @@
 import heapq
+
+import time
+
 INITIAL_STATE = [0, 3, 4, 3, 0, 5, 6, 5, 0, 1, 2, 1, 0, 7, 8, 7, 0, 9, 10, 9, 0, 1, 2, 1]
 
-def is_goal_state(state):
+def is_goal_state(state, goal_state=None):
     """
     state: Search state
 
     Returns True if and only if the state is a valid goal state.
     """
+    if goal_state is not None:
+        return state == goal_state
     return state == INITIAL_STATE
 
 
@@ -118,9 +123,10 @@ def breadth_first_search(init_state):
     
     frontier = Queue()
     frontier.push((init_state, [], 1))
-
+    
     while not frontier.is_empty():
         num_nodes += 1
+
         state, path, _ = frontier.pop()
         if is_goal_state(state):
             print(f"BFS expanded {num_nodes=}")
@@ -145,20 +151,23 @@ def out_of_place_right(state, target_state):
     out_of_place = sum([1 for p, gt in zip(state, target_state) if p != gt])
     return out_of_place
 
-def a_star_search(initial_state, heuristic=out_of_place_left):
+def a_star_search(initial_state, goal_state=INITIAL_STATE, heuristic=out_of_place_left):
     """Search the node that has the lowest combined cost and heuristic first."""
 
     num_nodes = 0
     reached = set()
 
     frontier = PriorityQueue()
-    h_cost = heuristic(initial_state)
+    if heuristic is out_of_place_right:
+        h_cost = heuristic(initial_state, goal_state)
+    else:
+        h_cost = heuristic(initial_state)
     frontier.push((initial_state, [], h_cost), h_cost)
 
     while not frontier.is_empty():
         num_nodes += 1
         state, path, path_cost = frontier.pop()
-        if is_goal_state(state):
+        if is_goal_state(state, goal_state):
             print(f"A* expanded {num_nodes=}")
             return path
 
@@ -167,11 +176,13 @@ def a_star_search(initial_state, heuristic=out_of_place_left):
             for successor_state, action, cost in get_successors(state):
                 new_path = path[:]
                 new_path.append(action)
-                h_cost = heuristic(successor_state)
+                if heuristic is out_of_place_right:
+                    h_cost = heuristic(successor_state, goal_state)
+                else:
+                    h_cost = heuristic(successor_state)
                 frontier.update((successor_state, new_path, path_cost + cost), path_cost + cost + h_cost)
 
 def bidirectional_a_star_search(initial_state, left_heuristic=out_of_place_left, right_heuristic=out_of_place_right):
-
     num_nodes = 0
 
     reached_left = set()
@@ -185,21 +196,107 @@ def bidirectional_a_star_search(initial_state, left_heuristic=out_of_place_left,
     h_cost_right = right_heuristic(INITIAL_STATE, target_state_right)
     frontier_right.push((initial_state, [], h_cost_right), h_cost_right)
 
-
-#    while not frontier_left.is_empty() and not frontier_right.is_empty():
-#        
-#        # Left
-#        num_nodes += 1
-#        state, path, path_cost = frontier_left.pop()
-#        if flatten(state) in reached_right:
-#            print(f"BD A* expanded{num_nodes=}")
-#            return path
+    target = None
+    while not frontier_left.is_empty() and not frontier_right.is_empty():
+        # Left
+        num_nodes += 1
+        state, path, path_cost = frontier_left.pop()
+        if flatten(state) in reached_right:
+            target = state
+            break
+        
+        if not flatten(state) in reached_left:
+            reached_left.add(flatten(state))
+            for successor_state, action, cost in get_successors(state):
+                new_path = path[:]
+                new_path.append(action)
+                h_cost = left_heuristic(successor_state)
+                frontier_left.update((successor_state, new_path, path_cost + cost), path_cost + cost + h_cost)
 
         # Right
-#         num_nodes += 1
+        num_nodes += 1
+        state, path, path_cost = frontier_right.pop()
+        if flatten(state) in reached_left:
+            target = state
+            break
+
+        if not flatten(state) in reached_right:
+            reached_right.add(flatten(state))
+            for successor_state, action, cost in get_successors(state):
+                new_path = path[:]
+                new_path.append(action)
+                h_cost = right_heuristic(successor_state, target_state_right)
+                frontier_right.update((successor_state, new_path, path_cost + cost), path_cost + cost + h_cost)
+
+    if target is not None:
+        print("initial_state", initial_state)
+        print("target", target)
+        print("goal_state", INITIAL_STATE)
+        left_path = a_star_search(initial_state, target, heuristic=left_heuristic) 
+        print(f"{left_path=}")
+        right_path = a_star_search(INITIAL_STATE, target, heuristic=right_heuristic)
+        print(f"{right_path=}")
+        right_path.reverse()
+        path = left_path + right_path
+        print(f"Bidirectional A* expanded {num_nodes=}")
+        return path
+    print("Failure: No path was found")
 
 
-    print("Unimplemented")
+
+def bidirectional_bfs(initial_state):
+    num_nodes = 0
+
+    reached_left = {}
+    frontier_left = Queue()
+    frontier_left.push((initial_state, [], 1))
+
+    reached_right = {} 
+    frontier_right = Queue()
+    frontier_right.push((INITIAL_STATE, [], 1))
+
+    while not frontier_left.is_empty() and not frontier_right.is_empty():
+        # Left
+        num_nodes += 1
+        state, path, path_cost = frontier_left.pop()
+        if flatten(state) in reached_right:
+            # Expanded from the left and found a connecting node
+            left_path = path[:-1]
+            right_path = reached_right[flatten(state)]
+            right_path.reverse()
+            path = left_path + right_path
+            print(f"Bidirectional BFS expanded {num_nodes=}")
+            return path
+        
+        if not flatten(state) in reached_left:
+            # reached_left.add(flatten(state))
+            reached_left[flatten(state)] = path
+            for successor_state, action, cost in get_successors(state):
+                new_path = path[:]
+                new_path.append(action)
+                frontier_left.push((successor_state, new_path, path_cost + cost))
+
+        # Right
+        num_nodes += 1
+        state, path, path_cost = frontier_right.pop()
+        if flatten(state) in reached_left:
+            # We expanded from the right and have found a connecting left node
+            left_path = reached_left[flatten(state)]
+            right_path = path[:-1]
+            right_path.reverse()
+            path = left_path + right_path
+            print(f"Bidirectional BFS expanded {num_nodes=}")
+            return path
+
+        if not flatten(state) in reached_right:
+            # reached_right.add(flatten(state))
+            reached_right[flatten(state)] = path
+            for successor_state, action, cost in get_successors(state):
+                new_path = path[:]
+                new_path.append(action)
+                frontier_right.push((successor_state, new_path, path_cost + cost))
+
+    print("Failure: No path was found")
 
 
 if __name__ == "__main__":
