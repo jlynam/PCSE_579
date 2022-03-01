@@ -64,27 +64,22 @@ def solve(canvas):
     solution = bidirectional_bfs(state)
     # solution = bidirectional_a_star_search(state)
     for move in solution:
-       #  print(move)
         if move == 1:
-            # canvas.after(2000, lambda: left_cw(canvas))
             left_cw(canvas)
             canvas.update_idletasks()
-            time.sleep(1)
+            time.sleep(1.5)
         elif move == 2:
-            # canvas.after(2000, lambda: right_cw(canvas))
             right_cw(canvas)
             canvas.update_idletasks()
-            time.sleep(1)
+            time.sleep(1.5)
         elif move == 3:
-            # canvas.after(2000, lambda: left_ccw(canvas))
             left_ccw(canvas)
             canvas.update_idletasks()
-            time.sleep(1)
+            time.sleep(1.5)
         else:
-            # canvas.after(2000, lambda: right_ccw(canvas))
             right_ccw(canvas)
             canvas.update_idletasks()
-            time.sleep(1)
+            time.sleep(1.5)
 
     print("-----")
             

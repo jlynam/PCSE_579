@@ -122,7 +122,7 @@ def breadth_first_search(init_state):
     reached = set({})
     
     frontier = Queue()
-    frontier.push((init_state, [], 1))
+    frontier.push((init_state, [], 0))
     
     while not frontier.is_empty():
         num_nodes += 1
@@ -182,64 +182,68 @@ def a_star_search(initial_state, goal_state=INITIAL_STATE, heuristic=out_of_plac
                     h_cost = heuristic(successor_state)
                 frontier.update((successor_state, new_path, path_cost + cost), path_cost + cost + h_cost)
 
-def bidirectional_a_star_search(initial_state, left_heuristic=out_of_place_left, right_heuristic=out_of_place_right):
+def out_of_place(a, b):
+    out_of_place = sum([1 for p, gt in zip(a, b) if p != gt])
+    return out_of_place
+
+
+def bidirectional_a_star_search(initial_state, heuristic=out_of_place):
     num_nodes = 0
+    
+    reached_l = {}
+    reached_r = {}
 
-    reached_left = set()
-    frontier_left = PriorityQueue()
-    h_cost_left = left_heuristic(initial_state)
-    frontier_left.push((initial_state, [], h_cost_left), h_cost_left)
+    q_l = PriorityQueue()
+    q_r = PriorityQueue()
 
-    target_state_right = initial_state
-    reached_right = set()
-    frontier_right = PriorityQueue()
-    h_cost_right = right_heuristic(INITIAL_STATE, target_state_right)
-    frontier_right.push((initial_state, [], h_cost_right), h_cost_right)
+    h_l = heuristic(initial_state, INITIAL_STATE)
+    q_l.push((initial_state, [], 0), h_l)
+    h_r = heuristic(INITIAL_STATE, initial_state)
+    q_r.push((INITIAL_STATE, [], 0), h_r)
 
-    target = None
-    while not frontier_left.is_empty() and not frontier_right.is_empty():
-        # Left
-        num_nodes += 1
-        state, path, path_cost = frontier_left.pop()
-        if flatten(state) in reached_right:
-            target = state
-            break
+    while not q_l.is_empty() and not q_r.is_empty():
         
-        if not flatten(state) in reached_left:
-            reached_left.add(flatten(state))
-            for successor_state, action, cost in get_successors(state):
-                new_path = path[:]
-                new_path.append(action)
-                h_cost = left_heuristic(successor_state)
-                frontier_left.update((successor_state, new_path, path_cost + cost), path_cost + cost + h_cost)
+        state_l, path_l, cost_l = q_l.pop()
+        if flatten(state_l) in reached_r:
+            path_r = reached_r[flatten(state_l)]
+            path_r = invert_path(path_r)
+            path_r.reverse()
+            path = path_l + path_r
+            print(path)
+            print(f"Bi-A* expanded {num_nodes=}")
+            return path
+        if not flatten(state_l) in reached_l:
+            num_nodes += 1
+            reached_l[flatten(state_l)] = path_l
+            for successor_state, action, cost in get_successors(state_l):
+                new_path_l = path_l[:]
+                new_path_l.append(action)
+                h_l = heuristic(successor_state, INITIAL_STATE)
+                q_l.update((successor_state, new_path_l, cost_l + cost), cost_l + cost + h_l)
 
-        # Right
-        num_nodes += 1
-        state, path, path_cost = frontier_right.pop()
-        if flatten(state) in reached_left:
-            target = state
-            break
 
-        if not flatten(state) in reached_right:
-            reached_right.add(flatten(state))
-            for successor_state, action, cost in get_successors(state):
-                new_path = path[:]
-                new_path.append(action)
-                h_cost = right_heuristic(successor_state, target_state_right)
-                frontier_right.update((successor_state, new_path, path_cost + cost), path_cost + cost + h_cost)
 
-    if target is not None:
-        print("initial_state", initial_state)
-        print("target", target)
-        print("goal_state", INITIAL_STATE)
-        left_path = a_star_search(initial_state, target, heuristic=left_heuristic) 
-        print(f"{left_path=}")
-        right_path = a_star_search(INITIAL_STATE, target, heuristic=right_heuristic)
-        print(f"{right_path=}")
-        right_path.reverse()
-        path = left_path + right_path
-        print(f"Bidirectional A* expanded {num_nodes=}")
-        return path
+        state_r, path_r, cost_r = q_r.pop()
+        if flatten(state_r) in reached_l:
+            path_l = reached_l[flatten(state_r)]
+            path_r = invert_path(path_r)
+            path_r.reverse()
+            path = path_l + path_r
+            print(path)
+            print(f"Bi-A* expanded {num_nodes=}")
+            return path
+        if not flatten(state_r) in reached_r:
+            num_nodes += 1
+            reached_r[flatten(state_r)] = path_r
+            for successor_state, action, cost in get_successors(state_r):
+                new_path_r = path_r[:]
+                new_path_r.append(action)
+                h_r = heuristic(successor_state, initial_state)
+                q_r.update((successor_state, new_path_r, cost_r + cost), cost_r + cost + h_r)
+
+
+
+
     print("Failure: No path was found")
 
 
@@ -265,8 +269,8 @@ def bidirectional_bfs(initial_state):
     q_l = Queue()
     q_r = Queue()
 
-    q_l.push((initial_state, [], 1))
-    q_r.push((INITIAL_STATE, [], 1))
+    q_l.push((initial_state, [], 0))
+    q_r.push((INITIAL_STATE, [], 0))
 
     
     while not q_l.is_empty() and not q_r.is_empty():
@@ -294,7 +298,6 @@ def bidirectional_bfs(initial_state):
         if flatten(state_r) in reached_l:
             
             path_l = reached_l[flatten(state_r)]
-            path_r = path_r
             path_r = invert_path(path_r)
             path_r.reverse()
             path = path_l + path_r
