@@ -57,14 +57,12 @@ def right_ccw(canvas):
     state = state[0:9] + state[19:21] + state[9:22]
     draw_state(canvas, state)
     
-# TODO implement A*
 def solve(canvas):
     global state
-    solution = breadth_first_search(state)
+    # solution = breadth_first_search(state)
     # print(a_star_search(state))
+    solution = bidirectional_bfs(state)
     # solution = bidirectional_a_star_search(state)
-    # solution = bidirectional_bfs(state)
-    # print("Bi-BFS solution:", solution)
     for move in solution:
        #  print(move)
         if move == 1:

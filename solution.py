@@ -243,60 +243,73 @@ def bidirectional_a_star_search(initial_state, left_heuristic=out_of_place_left,
     print("Failure: No path was found")
 
 
+def invert_path(path):
+    new_path = []
+    for action in path:
+        if action == 1:
+            new_path.append(3)
+        elif action == 2:
+            new_path.append(4)
+        elif action == 3:
+            new_path.append(1)
+        else:
+            new_path.append(2)
+
+    return new_path
 
 def bidirectional_bfs(initial_state):
     num_nodes = 0
+    reached_l = {}
+    reached_r = {}
 
-    reached_left = {}
-    frontier_left = Queue()
-    frontier_left.push((initial_state, [], 1))
+    q_l = Queue()
+    q_r = Queue()
 
-    reached_right = {} 
-    frontier_right = Queue()
-    frontier_right.push((INITIAL_STATE, [], 1))
+    q_l.push((initial_state, [], 1))
+    q_r.push((INITIAL_STATE, [], 1))
 
-    while not frontier_left.is_empty() and not frontier_right.is_empty():
-        # Left
-        num_nodes += 1
-        state, path, path_cost = frontier_left.pop()
-        if flatten(state) in reached_right:
-            # Expanded from the left and found a connecting node
-            left_path = path[:-1]
-            right_path = reached_right[flatten(state)]
-            right_path.reverse()
-            path = left_path + right_path
-            print(f"Bidirectional BFS expanded {num_nodes=}")
-            return path
+    
+    while not q_l.is_empty() and not q_r.is_empty():
         
-        if not flatten(state) in reached_left:
-            # reached_left.add(flatten(state))
-            reached_left[flatten(state)] = path
-            for successor_state, action, cost in get_successors(state):
-                new_path = path[:]
-                new_path.append(action)
-                frontier_left.push((successor_state, new_path, path_cost + cost))
-
-        # Right
-        num_nodes += 1
-        state, path, path_cost = frontier_right.pop()
-        if flatten(state) in reached_left:
-            # We expanded from the right and have found a connecting left node
-            left_path = reached_left[flatten(state)]
-            right_path = path[:-1]
-            right_path.reverse()
-            path = left_path + right_path
-            print(f"Bidirectional BFS expanded {num_nodes=}")
+        state_l, path_l, cost_l = q_l.pop()
+        if flatten(state_l) in reached_r:
+            path_r = reached_r[flatten(state_l)]
+            path_r = invert_path(path_r)
+            path_r.reverse()
+            path = path_l + path_r
+            print(path)
+            print(f"Bi-BFS expanded {num_nodes=}")
             return path
+        if not flatten(state_l) in reached_l:
+            num_nodes += 1
+            reached_l[flatten(state_l)] = path_l
+            for successor_state, action, cost in get_successors(state_l):
+                new_path_l = path_l[:]
+                new_path_l.append(action)
+                q_l.push((successor_state, new_path_l, cost))
 
-        if not flatten(state) in reached_right:
-            # reached_right.add(flatten(state))
-            reached_right[flatten(state)] = path
-            for successor_state, action, cost in get_successors(state):
-                new_path = path[:]
-                new_path.append(action)
-                frontier_right.push((successor_state, new_path, path_cost + cost))
 
-    print("Failure: No path was found")
+
+        state_r, path_r, cost_r = q_r.pop()
+        if flatten(state_r) in reached_l:
+            
+            path_l = reached_l[flatten(state_r)]
+            path_r = path_r
+            path_r = invert_path(path_r)
+            path_r.reverse()
+            path = path_l + path_r
+            print(path)
+            print(f"Bi-BFS expanded {num_nodes=}")
+            return path
+        if not flatten(state_r) in reached_r:
+            num_nodes += 1
+            reached_r[flatten(state_r)] = path_r
+            for successor_state, action, cost in get_successors(state_r):
+                new_path_r = path_r[:]
+                new_path_r.append(action)
+                q_r.push((successor_state, new_path_r, cost))
+
+    print("no solution found")
 
 
 if __name__ == "__main__":
